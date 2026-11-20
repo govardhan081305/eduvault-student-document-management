@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduVault | Student Document Management System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- ================= LOGIN / REGISTER ================= -->
+<div id="authView">
+  <div class="brand-panel">
+    <div class="logo"><div class="logo-mark">EV</div> EduVault</div>
+    <h1>All your academic documents, safe in the cloud.</h1>
+    <p>Store marksheets, certificates, ID proofs and fee receipts securely and access them anytime, from any device.</p>
+    <div class="features">
+      <div class="feature"><span>&#128274;</span> Private, encrypted storage for every student</div>
+      <div class="feature"><span>&#9889;</span> Instant upload, preview and download</div>
+      <div class="feature"><span>&#128202;</span> Smart dashboard with storage insights</div>
+      <div class="feature"><span>&#9729;</span> Serverless architecture on Amazon Web Services</div>
+    </div>
+    <div class="aws-note">Built with AWS Lambda &middot; Amazon S3 &middot; Amazon DynamoDB &middot; AWS IAM &middot; Amazon CloudWatch</div>
+  </div>
+
+  <div class="auth-side">
+    <div class="auth-card">
+      <h2 id="authTitle">Welcome back</h2>
+      <div class="sub" id="authSub">Log in to access your documents</div>
+      <div class="tabs">
+        <button id="tabLogin" class="active" onclick="showAuthTab('login')">Login</button>
+        <button id="tabRegister" onclick="showAuthTab('register')">Register</button>
+      </div>
+      <div id="authError" class="form-error hidden"></div>
+
+      <form id="loginForm" onsubmit="doLogin(event)">
+        <div class="field"><label>Student ID / USN</label><input id="loginId" placeholder="e.g. ENG23CS0069" required></div>
+        <div class="field"><label>Password</label><input id="loginPass" type="password" placeholder="Enter your password" required></div>
+        <button class="btn btn-primary btn-block" id="loginBtn" type="submit">Log In</button>
+      </form>
+
+      <form id="registerForm" class="hidden" onsubmit="doRegister(event)">
+        <div class="field"><label>Full Name</label><input id="regName" placeholder="Your full name" required></div>
+        <div class="row2">
+          <div class="field"><label>Student ID / USN</label><input id="regId" placeholder="ENG23CS0069" required></div>
+          <div class="field"><label>Department</label>
+            <select id="regDept">
+              <option>Computer Science</option><option>Information Science</option><option>Electronics &amp; Communication</option>
+              <option>Electrical</option><option>Mechanical</option><option>Civil</option><option>AI &amp; ML</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="field"><label>Email</label><input id="regEmail" type="email" placeholder="you@college.edu" required></div>
+        <div class="row2">
+          <div class="field"><label>Password</label><input id="regPass" type="password" placeholder="Min. 6 characters" required minlength="6"></div>
+          <div class="field"><label>Confirm Password</label><input id="regPass2" type="password" placeholder="Repeat password" required minlength="6"></div>
+        </div>
+        <button class="btn btn-primary btn-block" id="registerBtn" type="submit">Create Account</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ================= DASHBOARD APP ================= -->
+<div id="appView" class="hidden">
+  <aside class="sidebar">
+    <div class="logo"><div class="logo-mark">EV</div> EduVault</div>
+    <nav class="nav">
+      <button data-view="dashboard" class="active" onclick="showView('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</button>
+      <button data-view="documents" onclick="showView('documents')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></svg>My Documents</button>
+      <button data-view="upload" onclick="showView('upload')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>Upload</button>
+      <button data-view="profile" onclick="showView('profile')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Profile</button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="storage-mini">
+        <div><b id="miniUsed">0 KB</b> of 100 MB used</div>
+        <div class="bar"><div id="miniBar" style="width:0%"></div></div>
+      </div>
+      <div class="nav"><button onclick="logout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Logout</button></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div><h1 id="pageTitle">Dashboard</h1><div class="muted" id="pageSub"></div></div>
+      <div class="user-chip"><div class="avatar" id="avatar">S</div>
+        <div><div class="name" id="chipName">Student</div><div class="id" id="chipId"></div></div></div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <section id="view-dashboard">
+      <div class="stats">
+        <div class="card stat"><div class="stat-icon" style="background:#eef2ff;color:var(--primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
+          <div><div class="label">Total Documents</div><div class="value" id="stTotal">0</div></div></div>
+        <div class="card stat"><div class="stat-icon" style="background:#f3e8ff;color:var(--purple)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/></svg></div>
+          <div><div class="label">Storage Used</div><div class="value" id="stStorage">0 KB</div></div></div>
+        <div class="card stat"><div class="stat-icon" style="background:#dcfce7;color:var(--green)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></div>
+          <div><div class="label">Categories Used</div><div class="value" id="stCats">0 / 5</div></div></div>
+        <div class="card stat"><div class="stat-icon" style="background:#ffedd5;color:var(--orange)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+          <div><div class="label">Last Upload</div><div class="value" id="stLast" style="font-size:16px">&mdash;</div></div></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><h3>Recent Uploads <button class="btn btn-light" style="padding:7px 12px;font-size:12px" onclick="showView('documents')">View all</button></h3>
+          <div id="recentList"></div></div>
+        <div class="card"><h3>Documents by Category</h3><div id="catBreakdown"></div></div>
+      </div>
+    </section>
+
+    <!-- DOCUMENTS -->
+    <section id="view-documents" class="hidden">
+      <div class="card">
+        <div class="toolbar">
+          <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input id="searchBox" placeholder="Search documents by name..." oninput="renderTable()"></div>
+          <select id="sortBy" onchange="renderTable()">
+            <option value="new">Newest first</option><option value="old">Oldest first</option>
+            <option value="name">Name (A-Z)</option><option value="size">Largest first</option>
+          </select>
+          <button class="btn btn-primary" onclick="showView('upload')">+ Upload</button>
+        </div>
+        <div class="chips" id="chips"></div>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>Document</th><th>Category</th><th class="hide-sm">Size</th><th class="hide-sm">Uploaded</th><th>Actions</th></tr></thead>
+          <tbody id="docTable"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- UPLOAD -->
+    <section id="view-upload" class="hidden">
+      <div class="grid2">
+        <div class="card">
+          <h3>Upload Documents</h3>
+          <div class="field"><label>Category</label>
+            <select id="upCategory"><option>Marksheet</option><option>Certificate</option><option>ID Proof</option><option>Fee Receipt</option><option>Other</option></select></div>
+          <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+            <div class="circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div>
+            <h4>Drag &amp; drop files here</h4>
+            <p>or <b style="color:var(--primary)">browse</b> from your computer &middot; PDF, JPG, PNG, DOCX &middot; max 10 MB each</p>
+          </div>
+          <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" class="hidden" onchange="handleFiles(this.files)">
+          <div id="queue"></div>
+        </div>
+        <div class="card">
+          <h3>Upload Guidelines</h3>
+          <div class="recent-item"><div class="ftype pdf">PDF</div><div class="info"><div class="fname">Marksheets &amp; certificates</div><div class="meta">Scan in colour at 200-300 DPI for clear copies</div></div></div>
+          <div class="recent-item"><div class="ftype img">IMG</div><div class="info"><div class="fname">ID proofs &amp; photos</div><div class="meta">JPG or PNG, both sides of the card if needed</div></div></div>
+          <div class="recent-item"><div class="ftype doc">DOC</div><div class="info"><div class="fname">Receipts &amp; letters</div><div class="meta">Choose the right category for easy searching</div></div></div>
+          <div class="recent-item"><div class="ftype" style="background:#f1f5f9;color:var(--muted)">&#128274;</div><div class="info"><div class="fname">Private by default</div><div class="meta">Files are stored in a private S3 bucket; only you can access them</div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROFILE -->
+    <section id="view-profile" class="hidden">
+      <div class="grid2">
+        <div class="card">
+          <div class="profile-head"><div class="avatar" id="pfAvatar">S</div>
+            <div><h2 id="pfName" style="font-size:20px">Student</h2><div style="color:var(--muted)" id="pfDept"></div></div></div>
+          <div class="profile-grid">
+            <div class="pf"><div class="k">Student ID</div><div class="v" id="pfId"></div></div>
+            <div class="pf"><div class="k">Email</div><div class="v" id="pfEmail"></div></div>
+            <div class="pf"><div class="k">Documents</div><div class="v" id="pfDocs">0</div></div>
+            <div class="pf"><div class="k">Storage Used</div><div class="v" id="pfStorage">0 KB</div></div>
+          </div>
+          <button class="btn btn-light" style="margin-top:20px" onclick="logout()">Log out</button>
+        </div>
+        <div class="card">
+          <h3>How your data is protected</h3>
+          <div class="arch"><div>Browser</div><div>Lambda</div><div>DynamoDB</div><div>S3</div><div>CloudWatch</div></div>
+          <ul style="margin:18px 0 0 18px;line-height:1.9;color:var(--muted)">
+            <li>Passwords are hashed with PBKDF2-SHA256 and never stored in plain text</li>
+            <li>Every request carries a signed session token that expires after 8 hours</li>
+            <li>Files sit in a private S3 bucket, reachable only through 5-minute signed links</li>
+            <li>Each student can access only their own folder and records</li>
+            <li>All activity is logged in Amazon CloudWatch</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- delete modal -->
+<div id="modal" class="overlay hidden">
+  <div class="modal">
+    <h3>Delete document?</h3>
+    <p id="modalText">This file will be permanently removed from cloud storage.</p>
+    <div class="btns"><button class="btn btn-light" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" id="modalConfirm">Delete</button></div>
+  </div>
+</div>
+<div class="toasts" id="toasts"></div>
+
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
