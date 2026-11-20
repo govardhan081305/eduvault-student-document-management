@@ -1,9 +1,19 @@
 [
   {
-    "AllowedHeaders": ["*"],
-    "AllowedMethods": ["GET", "POST"],
-    "AllowedOrigins": ["*"],
-    "ExposeHeaders": ["ETag"],
+    "AllowedHeaders": [
+      "*"
+    ],
+    "AllowedMethods": [
+      "GET",
+      "POST"
+    ],
+    "AllowedOrigins": [
+      "https://d1qub8ki2toxxc.cloudfront.net/",
+      "http://localhost:8000"
+    ],
+    "ExposeHeaders": [
+      "ETag"
+    ],
     "MaxAgeSeconds": 3000
   }
 ]

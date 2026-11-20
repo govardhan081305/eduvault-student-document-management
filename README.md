@@ -10,6 +10,10 @@
 ![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=black)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
+### 🌐 Live Demo: **[https://d1qub8ki2toxxc.cloudfront.net/](https://d1qub8ki2toxxc.cloudfront.net/)**
+
+Hosted on AWS (S3 + CloudFront). Create an account with your Student ID to try it.
+
 **CAT-3 Minor Project** · Department of Computer Science & Engineering
 **Author:** Govardhana J M · **USN:** ENG23CS0069
 
@@ -162,7 +166,7 @@
 
 | Layer | Technology |
 |-------|------------|
-| Frontend | HTML5, CSS3, Vanilla JavaScript (no framework, no build step) |
+| Frontend | HTML5, CSS3, Vanilla JavaScript (no framework, no build step), hosted on S3 + CloudFront |
 | Backend | Python 3.12 on AWS Lambda (Function URL), `boto3` |
 | Database | Amazon DynamoDB |
 | File storage | Amazon S3 (pre-signed POST / GET) |
@@ -206,7 +210,7 @@ eduvault-student-document-management/
 ### Quick setup
 1. **Clone the repo**
    ```bash
-   git clone https://github.com/govardhan081305/eduvault-student-document-management.git
+   git clone https://github.com/<your-username>/eduvault-student-document-management.git
    cd eduvault-student-document-management
    ```
 2. **Create AWS resources** – S3 bucket, two DynamoDB tables, IAM role, Lambda function with a Function URL.
@@ -222,7 +226,11 @@ eduvault-student-document-management/
    cd frontend
    python -m http.server 8000
    ```
-   Open <http://localhost:8000>, or host the `frontend/` folder on S3 static hosting / GitHub Pages.
+   Open <http://localhost:8000>.
+6. **Deploy** – upload the `frontend/` folder to an S3 bucket served through CloudFront
+   (live site: <https://d1qub8ki2toxxc.cloudfront.net/>) and invalidate the cache (`/*`) after each update.
+7. **CORS** – allow your site origin (`https://d1qub8ki2toxxc.cloudfront.net/`, no trailing slash) in both the S3 bucket CORS
+   ([`backend/s3-cors.json`](backend/s3-cors.json)) and the Lambda Function URL CORS settings.
 
 > ⚠️ Never commit your real `SECRET_KEY`. Keep it only in the Lambda environment variables.
 
@@ -247,7 +255,7 @@ Details and examples: [`docs/API.md`](docs/API.md).
 - Enforce the 100 MB per-student storage quota on the server (currently shown in the UI only)
 - Password reset by email (Amazon SES)
 - Edit / rename documents and change category
-- Restrict CORS to the production domain and add a CloudFront distribution
+- Add a custom domain name and HTTPS certificate (AWS Certificate Manager) in front of CloudFront
 - Infrastructure as code (AWS SAM / CloudFormation) for one-command deployment
 
 ## Conclusion
